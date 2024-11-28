@@ -10,6 +10,7 @@ import { verifyToken } from "../../middleware/verifyToken";
 
 const router: Router = Router();
 
+// GET: get all jobs
 router.get("/", getAllJobs as any);
 router.get("/:jobId", getJobById as any);
 router.post("/add", verifyToken as any, addJob as any);

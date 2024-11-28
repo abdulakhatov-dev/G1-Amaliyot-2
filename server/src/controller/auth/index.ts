@@ -39,7 +39,7 @@ export const signUp = async (req: Request, res: Response) => {
     users.unshift(newUser);
 
     // Create token;
-    const token = generateToken({ email: body.email }, SECRET_KEY, "1s");
+    const token = generateToken({ email: body.email }, SECRET_KEY, "1d");
 
     res.status(200).json({
       success: true,
@@ -80,7 +80,7 @@ export const signIn = async (req: Request, res: Response) => {
     }
 
     // Create token;
-    const token = generateToken({ email: body.email }, SECRET_KEY, "1s");
+    const token = generateToken({ email: body.email }, SECRET_KEY, "1d");
 
     res.status(200).json({
       success: true,
