@@ -4,6 +4,8 @@ import { jobs } from "../../utils/jobs";
 import { IJob } from "../../interfaces";
 import { NotFoundHandler } from "../../helpers";
 import { category } from "../../utils/category";
+import { apiErrorHandler } from "../../errors";
+import { validateAddJob, validateEditJob } from "../../validation/job";
 
 export const getAllJobs = (req: Request, res: Response) => {
   // const { type, search } = req.query;
@@ -20,8 +22,8 @@ export const getAllJobs = (req: Request, res: Response) => {
   if (search) {
     data = jobs.filter(
       (job: IJob) =>
-        job.title.toLowerCase().includes(search.toLowerCase()) ||
-        job.description.toLowerCase().includes(search.toLowerCase())
+        job?.title?.toLowerCase().includes(search.toLowerCase()) ||
+        job?.description?.toLowerCase().includes(search.toLowerCase())
     );
   }
 
@@ -51,59 +53,67 @@ export const getJobById = (req: Request, res: Response) => {
 };
 
 export const addJob = (req: Request, res: Response) => {
-  const body = req.body;
+  try {
+    const body = validateAddJob(req.body);
 
-  if (!category.includes(req.body.type.toLowerCase())) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid job type",
+    if (!category.includes(req.body.type.toLowerCase())) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid job type",
+      });
+    }
+
+    const newJob = {
+      id: String(jobs.length + 1),
+      title: body.title,
+      type: body.type,
+      location: body.location,
+      description: body.description,
+      salary: body.salary,
+      company: {
+        name: body.company.name,
+        description: body.company.description,
+        contactEmail: body.company.contactEmail,
+        contactPhone: body.company.contactPhone,
+      },
+    };
+
+    jobs.unshift(newJob);
+
+    res.status(201).json({
+      success: true,
+      message: "Job created successfully",
+      data: newJob,
     });
+  } catch (error) {
+    apiErrorHandler(res, error);
   }
-
-  const newJob = {
-    id: String(jobs.length + 1),
-    title: body.title,
-    type: body.type,
-    location: body.location,
-    description: body.description,
-    salary: body.salary,
-    company: {
-      name: body.company.name,
-      description: body.company.description,
-      contactEmail: body.company.contactEmail,
-      contactPhone: body.company.contactPhone,
-    },
-  };
-
-  jobs.unshift(newJob);
-
-  res.status(201).json({
-    success: true,
-    message: "Job created successfully",
-    data: newJob,
-  });
 };
 
 export const editJob = (req: Request, res: Response) => {
-  const jobId = req.params.jobId as string;
-  const body = req.body;
+  try {
+    const jobId = req.params.jobId as string;
+    const body = validateEditJob(req.body);
 
-  const index = jobs.findIndex((job: IJob) => job.id === jobId);
+    const index = jobs.findIndex((job: IJob) => job.id === jobId);
 
-  if (index === -1) {
-    return NotFoundHandler(res, "Job");
+    if (index === -1) {
+      return NotFoundHandler(res, "Job");
+    }
+
+    jobs[index] = {
+      ...jobs[index],
+      ...body,
+    };
+
+    res.status(200).json({
+      success: true,
+      message: "Job successfully updated",
+      data: jobs[index],
+    });
+  } catch (error) {
+    apiErrorHandler(res, error);
   }
-
-  jobs[index] = {
-    ...jobs[index],
-    ...body,
-  };
-
-  res.status(200).json({
-    success: true,
-    message: "Job successfully updated",
-    data: jobs[index],
-  });
 };
 
 export const deleteJob = (req: Request, res: Response) => {
