@@ -1,3 +1,4 @@
+# G1 Amaliyot 2 (IT Jobs MERN loyiha)
 
 ![alt text](image-3.png)
 
