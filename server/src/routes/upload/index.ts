@@ -1,9 +1,14 @@
 import { Router } from "express";
 import { verifyToken } from "../../middleware/verifyToken";
-import { upload, uploadImage, uploadMultipleImages } from "../../controller/upload";
+import {
+  upload,
+  uploadImage,
+  uploadMultipleImages,
+} from "../../controller/upload";
 
 const router = Router();
 
+// POST: upload single image
 router.post(
   "/image",
   verifyToken as any,
@@ -11,6 +16,12 @@ router.post(
   uploadImage as any
 );
 
-router.post('/images', verifyToken as any, upload.array('images', 5), uploadMultipleImages as any)
+// POST: upload multiple images
+router.post(
+  "/images",
+  verifyToken as any,
+  upload.array("images", 4),
+  uploadMultipleImages as any
+);
 
 export default router;
